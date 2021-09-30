@@ -1,0 +1,75 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: karmarkar
+  name: restgosql-mysql-service
+  labels:
+    app: restgosql
+spec:
+  type: ClusterIP
+  ports:
+    - name: "3306"
+      port: 3306
+      targetPort: 3306
+      protocol: TCP
+  selector:
+    app: restgosql
+    tier: mysql
+  clusterIP: 10.97.49.8
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: karmarkar
+  name: mysql-pv-claim
+  labels:
+    app: restgosql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: karmarkar
+  name: restgosql-mysql
+  labels:
+    app: restgosql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: restgosql
+      tier: mysql
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      namespace: karmarkar
+      labels:
+        app: restgosql
+        tier: mysql
+    spec:
+      containers:
+      - image: mysql:5.6
+        name: mysql
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          value: ashish
+        ports:
+        - containerPort: 3306
+          name: mysql
+        volumeMounts:
+        - name: mysql-persistent-storage
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-persistent-storage
+        persistentVolumeClaim:
+          claimName: mysql-pv-claim

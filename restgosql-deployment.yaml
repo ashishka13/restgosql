@@ -1,0 +1,76 @@
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: karmarkar
+  name: restgosql-service
+  labels:
+    app: restgosql
+spec:
+  type: LoadBalancer
+  ports:
+    - name: "1234"
+      port: 1234
+      nodePort: 30005
+      protocol: TCP
+  selector:
+    app: restgosql
+    tier: frontend
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  namespace: karmarkar
+  name: rg-pv-claim
+  labels:
+    app: restgosql
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: karmarkar
+  name: restgosql-app
+  labels:
+    app: restgosql
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: restgosql
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      namespace: karmarkar
+      labels:
+        app: restgosql
+        tier: frontend
+    spec:
+      containers:
+      - image: nivantdot/restgosql
+        name: restgosql
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        env:
+        - name: MY_DB_HOST
+          value: restgosql-mysql
+        - name: MY_DB_PASSWORD
+          value: ashish
+        ports:
+        - containerPort: 1234
+          name: restgosql
+        volumeMounts:
+        - name: restgosql-persistent-storage
+          mountPath: /var/www/html
+      volumes:
+      - name: restgosql-persistent-storage
+        persistentVolumeClaim:
+          claimName: rg-pv-claim

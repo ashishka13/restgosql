@@ -6,32 +6,18 @@ import (
 	"log"
 	"net/http"
 	"restgo/models"
-
-	"database/sql"
+	"restgo/utils"
 
 	"github.com/gorilla/mux"
 
 	_ "github.com/go-sql-driver/mysql" // this is mysql driver import
 )
 
-// Database will establish database connection
-func Database() (db *sql.DB, err error) {
-	dbDriver := "mysql"
-	dbUser := "root"
-	dbPass := "ashish"
-	dbName := "hellosql"
-	db, err = sql.Open(dbDriver, dbUser+":"+dbPass+"@/"+dbName)
-	if err != nil {
-		log.Println("database connectin error")
-		return
-	}
-	return
-}
-
 func createCustomer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "customer to be created")
 
-	db, err := Database()
+	db, err := utils.Database()
+	log.Println("db error ", err)
 	if err != nil {
 		log.Println("db error ", err)
 		return
@@ -48,12 +34,14 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	statement, err := db.Prepare("INSERT INTO students (`fname`, `lname`) values (?, ?)")
+	log.Println("prepare error ", err)
 	if err != nil {
 		log.Println("prepare error ", err)
 		return
 	}
 
 	insertresult, err := statement.Exec(customer.FName, customer.LName)
+	log.Println("insert error ", err)
 	if err != nil {
 		log.Println("insert error ", err)
 		return
@@ -69,14 +57,17 @@ func createCustomer(w http.ResponseWriter, r *http.Request) {
 func getCustomers(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "customer to be get")
 
-	db, err := Database()
+	db, err := utils.Database()
+	log.Println("db error ", err)
 	if err != nil {
+		log.Println("db error ", err)
 		return
 	}
 	defer db.Close()
 
 	resultSet, err := db.Query("SELECT * FROM students")
 	if err != nil {
+		log.Println("query error SELECT * FROM students", err)
 		return
 	}
 	var customerList []models.Customer
@@ -85,6 +76,7 @@ func getCustomers(w http.ResponseWriter, r *http.Request) {
 		singleCustomer := models.Customer{}
 
 		err = resultSet.Scan(&singleCustomer.ID, &singleCustomer.FName, &singleCustomer.LName)
+		log.Println("error occurred while getting customers", err)
 		if err != nil {
 			log.Println("error occurred while getting customers", err)
 			return
@@ -99,7 +91,8 @@ func getCustomers(w http.ResponseWriter, r *http.Request) {
 func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "customer to be deleted ")
 
-	db, err := Database()
+	db, err := utils.Database()
+	log.Println("db error ", err)
 	if err != nil {
 		log.Println("db error ", err)
 		return
@@ -110,11 +103,13 @@ func deleteCustomer(w http.ResponseWriter, r *http.Request) {
 
 	id := params["customerNo"]
 	delStatement, err := db.Prepare("DELETE FROM students WHERE id=?")
+	log.Println("error occurred while deleting user", err)
 	if err != nil {
 		log.Println("error occurred while deleting user", err)
 		return
 	}
 	deleteresult, err := delStatement.Exec(id)
+	log.Println("error occurred while deleting user", err)
 	if err != nil {
 		log.Println("error occurred while deleting user", err)
 		return
@@ -135,8 +130,6 @@ func welcome(w http.ResponseWriter, r *http.Request) {
 
 // MyController ...
 func MyController() {
-	log.Println("hello world")
-
 	// ip, err := utils.GetLocalIP()
 	// if err != nil {
 	// 	log.Println("ip find error ", err)

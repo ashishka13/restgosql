@@ -14,6 +14,10 @@ import (
 	_ "github.com/go-sql-driver/mysql" // this is mysql driver import
 )
 
+func init() {
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
+}
+
 type mysqlSecret struct {
 	Mysql_host     string `json:"mysql_host"`
 	Mysql_user     string `json:"mysql_user"`
@@ -55,7 +59,7 @@ func InitializeDatabase() (err error) {
 		return
 	}
 
-	dburl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, "localhost", dbPort, dbName)
+	dburl := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", dbUser, dbPass, dbHost, dbPort, dbName)
 	db, err = sql.Open("mysql", dburl)
 	log.Println("database connectin error ping db ", err)
 	if err != nil {

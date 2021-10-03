@@ -1,0 +1,19 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  namespace: karmarkar
+  name: restgosql-ingress
+  labels:
+    name: restgosql-ingress
+spec:
+  rules:
+  - host: mymoto1100.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/"
+        backend:
+          service:
+            name: restgosql-service
+            port: 
+              number: 1234

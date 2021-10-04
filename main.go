@@ -10,7 +10,7 @@ func main() {
 	log.Println("hello world")
 	err := utils.InitializeDatabase()
 	if err != nil {
-		log.Panic("database not initialized")
+		log.Println("database not initialized")
 	}
 	controller.MyController()
 }

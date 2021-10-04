@@ -56,10 +56,6 @@ spec:
       containers:
       - image: mysql:8.0
         name: mysql
-        resources:
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
         env:
         - name: MYSQL_ROOT_PASSWORD
           value: ashish

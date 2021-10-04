@@ -53,7 +53,6 @@ spec:
         app: restgosql
         tier: mysql
     spec:
-      restartPolicy: OnFailure
       containers:
       - image: mysql:8.0
         name: mysql

@@ -6,11 +6,10 @@ metadata:
   labels:
     app: restgosql
 spec:
-  type: NodePort
+  type: ClusterIP
   ports:
     - name: "1234"
       port: 1234
-      nodePort: 30005
   selector:
     app: restgosql
     tier: frontend
@@ -65,6 +64,11 @@ spec:
         volumeMounts:
         - name: restgosql-persistent-storage
           mountPath: /var/www/html
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+      restartPolicy: Always
       volumes:
       - name: restgosql-persistent-storage
         persistentVolumeClaim:
